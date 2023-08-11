@@ -3,7 +3,7 @@ app:
     bootstrap-home: 'D:/primavera'
     mode: 0
     host: 'localhost'
-    port: 1433
+    port: 9099
     username: 'admin'
     password: 'Admin712'
 

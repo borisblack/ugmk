@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app.primavera")
 @Data
 public class PrimaveraProps {
-    public static final int DEFAULT_MODE = 0;
+    public static final int DEFAULT_MODE = 1;
     public static final String DEFAULT_HOST = "localhost";
-    public static final int DEFAULT_PORT = 1433;
+    public static final int DEFAULT_PORT = 9099;
 
     private String bootstrapHome = "";
     private int mode = DEFAULT_MODE;
