@@ -1,2 +1,11 @@
+app:
+  primavera:
+    bootstrap-home: 'D:/primavera'
+    mode: 0
+    host: 'localhost'
+    port: 1433
+    username: 'admin'
+    password: 'Admin712'
+
 server:
   port: 8082

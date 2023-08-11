@@ -1,305 +1,200 @@
 package com.amplifierconsultancy.ugmk.service;
 
-import com.primavera.common.value.spread.WBSSpread;
-import com.primavera.integration.client.GlobalObjectManager;
-import com.primavera.integration.client.Session;
+import com.amplifierconsultancy.ugmk.config.props.PrimaveraProps;
+import com.amplifierconsultancy.ugmk.dto.WbsDto;
+import com.amplifierconsultancy.ugmk.mapper.WbsMapper;
+import com.primavera.ServerException;
+import com.primavera.integration.client.ClientException;
 import com.primavera.integration.client.EnterpriseLoadManager;
 import com.primavera.integration.client.RMIURL;
-import com.primavera.integration.client.bo.object.*;
-import com.primavera.integration.common.DatabaseInstance;
+import com.primavera.integration.client.Session;
 import com.primavera.integration.client.bo.BOIterator;
-
-import com.amplifierconsultancy.ugmk.mapper.WbsMapper;
+import com.primavera.integration.client.bo.BusinessObjectException;
+import com.primavera.integration.client.bo.object.Project;
+import com.primavera.integration.client.bo.object.WBS;
+import com.primavera.integration.common.DatabaseInstance;
+import com.primavera.integration.network.NetworkException;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Data
 @Slf4j
 public class WbsService {
+    public static final String PRIMAVERA_BOOTSTRAP_HOME = "primavera.bootstrap.home";
+
+    @NonNull
+    private final PrimaveraProps primaveraProps;
+
     @NonNull
     private final WbsMapper wbsMapper;
 
-    public void loadWbsList() {
-        System.setProperty("primavera.bootstrap.home","D:\\ProgramJPS\\P6IntegrationAPI_1");
-        //System.setProperty("primavera.bootstrap.home","C:\\P6IntegrationAPI_1");
-        Session session = null;
+    @PostConstruct
+    public void init() {
+        System.setProperty(PRIMAVERA_BOOTSTRAP_HOME, primaveraProps.getBootstrapHome());
+    }
 
-        try {
-            DatabaseInstance[] dbInstances = Session.getDatabaseInstances(
-                    RMIURL.getRmiUrl( RMIURL.LOCAL_SERVICE ) );
+    public List<WbsDto> loadWbsList() {
+        final DatabaseInstance dbInstance = tryGetDbInstance();
 
-            // Assume only one database instance for now, and hardcode the username and
-            // password for this sample code
-            session = Session.login( RMIURL.getRmiUrl( RMIURL.LOCAL_SERVICE ),
-                    dbInstances[0].getDatabaseId(), "admin", "Admin712" );
-
-//            GlobalObjectManager glb = session.getGlobalObjectManager();
-//            BOIterator<EPS> boi_EPS = glb.loadEPS( new String[]{"Name"}, null, null);
-//            System.out.println("EPS start");
-//            while ( boi_EPS.hasNext() ) {
-//                EPS o = boi_EPS.next();
-//                System.out.println(o.getName());
-//            }
-//
-//            BOIterator<OBS> boi_OBS = glb.loadOBS( new String[]{"Name"}, null, null);
-//            System.out.println("OBS start");
-//            while ( boi_OBS.hasNext() ) {
-//                OBS o = boi_OBS.next();
-//                System.out.println(o.getName());
-//            }
-
-//            String tab_s = "          ";
-//            String tab_ss = "                                                                                                  ";
-
+        try (Session session = Session.login(getRmiUrl(), dbInstance.getDatabaseId(), primaveraProps.getUsername(), primaveraProps.getPassword())) {
+            List<WbsDto> wbsList = new ArrayList<>();
             EnterpriseLoadManager elm = session.getEnterpriseLoadManager();
-            System.out.println("Project start");
-            BOIterator<Project> boi = elm.loadProjects( new String[]{
-                            "ObjectId",
-                            "Name",
-                            "WBSHierarchyLevels",
+            BOIterator<Project> boi = elm.loadProjects(
+                    new String[] {
+                            "ObjectId", // ID проекта
+                            "Name", // Наименование проекта
+                            "WBSHierarchyLevels", // Level WBS
                             "WBSCodeSeparator",
                             "OBSName",
-                            //"Description",
-                            //"LocationName",
+//                            "Description",
+//                            "LocationName",
                             "ActivityIdPrefix",
-                            "Id",
+                            "Id", // Код проекта
                             "ActivityDefaultCalendarName",
                             "AddedBy",
-                            //"ContractManagementGroupName",
-                            //"ContractManagementProjectName",
-                            //"LocationObjectId",
+//                            "ContractManagementGroupName",
+//                            "ContractManagementProjectName",
+//                            "LocationObjectId",
                             "ParentEPSName",
-                            //"ResourceName",
-                            //"UnifierProjectName",
-                            "WBSObjectId",
-                            "GUID",
+//                            "ResourceName",
+//                            "UnifierProjectName",
+                            "WBSObjectId", // ID WBS (id узла в дереве)
+                            "GUID", // GUID
                             "Status",
                             "StartDate",
                             "FinishDate",
                             "PlannedStartDate",
                             "SummaryPlannedFinishDate",
                             "SummaryActualStartDate",
-                            "SummaryActualFinishDate"},
-                    //"Name like '%кустовой%' ",null /*"Name asc"*/ );
-                    //"ObjectId = 4825 ","ObjectId asc" );
-                    "ObjectId = 368 ","ObjectId asc" );
+                            "SummaryActualFinishDate"
+                    },
+                    "ObjectId = 368",
+                    "ObjectId asc"
+            );
 
-            System.out.println("Код проекта  id проекта  id WBS   level WBS  Наименование проекта                GUID                                     плановая стартовая дата  плановая общая дата окончания  актуальная стартовая дата  актуальная дата окончания");
-            while ( boi.hasNext() )
-            {
+            while (boi.hasNext()) {
                 Project proj = boi.next();
-//                if ( proj.getDescription() != null ) {
-//                    System.out.println(proj.getDescription());
-//                }
-//                if ( proj.getLocationName() != null ) {
-//                    System.out.println(proj.getLocationName());
-//                }
-                System.out.println(proj.getId() + "         " +                   // код проекта
-                        proj.getObjectId().toString() + "        " +   // id проекта
-                        proj.getWBSObjectId() + "    " +               // id WBS (id узла в дереве)
-                        proj.getWBSHierarchyLevels() + "          " +  // level WBS
-                        proj.getName() + "  " +                        // Наименование проекта
-                        proj.getGUID() + "   " +                        // GUID
-                        ((proj.getPlannedStartDate() == null) ? "не задана                 " : proj.getPlannedStartDate().toString()+ "               ") +
-                        ((proj.getSummaryPlannedFinishDate() == null) ? "не задана                      " : proj.getSummaryPlannedFinishDate().toString()+ "               ") +
-                        ((proj.getSummaryActualStartDate() == null) ? "не задана                  " : proj.getSummaryActualStartDate().toString()+ "            ") +
-                        ((proj.getSummaryActualFinishDate() == null) ? "не задана" : proj.getSummaryActualFinishDate().toString()));
+                BOIterator<WBS> boiWbs = proj.loadAllWBS(
+                        new String[] {
+                                "Name",
+                                "Code",
+                                "GUID",
+                                "OBSName",
+                                "ParentObjectId",
+                                //"StatusReviewerName",
+                                //"WBSSpread",
+                                "ObjectId",
+                                "WBSCategoryObjectId",
+                                "Status",
+                                "StartDate",
+                                "FinishDate",
+                                "SummaryActualStartDate",
+                                "SummaryActualFinishDate"
+                        },
+                        "ParentObjectId = " + proj.getWBSObjectId(),
+                        "ObjectId asc"
+                );
 
-                System.out.println();
-                System.out.println();
-
-//                System.out.println(proj.getActivityIdPrefix()); //КП12.
-//                System.out.println(proj.getActivityDefaultCalendarName()); //какой-то период
-//                System.out.println(proj.getAddedBy()); //кем добавлено
-//
-//                System.out.println(proj.getContractManagementGroupName()); //null
-//                System.out.println(proj.getContractManagementProjectName()); //null
-//
-//                System.out.println(proj.getLocationObjectId()); //null
-//
-//                System.out.println(proj.getParentEPSName()); //All  Initiatives
-//
-//                System.out.println(proj.getResourceName()); //null
-//                System.out.println(proj.getUnifierProjectName()); //null
-//
-//                if ( proj.getOBSName() != null ) {
-//                    System.out.println(proj.getOBSName()); //CEPTR
-//                 }
-//
-//                if ( proj.getWBSCodeSeparator() != null ) {
-//                    System.out.println(proj.getWBSCodeSeparator()); // (.) "точка" разделитель
-//                }
-//
-//                if ( proj.getWBSHierarchyLevels() != null ) {
-//                    System.out.println(proj.getWBSHierarchyLevels()); // 0 - level в дереве
-//                }
-//
-//                System.out.println( proj.getName() + " id проекта:" + proj.getObjectId().toString() ); //наименование проекта
-
-//                BOIterator<Activity> boi_a = proj.loadAllActivities( new String[]{ "Id", "Name" }, null, "Name desc" );
-//                while ( boi.hasNext() )
-//                {
-//                    Activity act = boi_a.next();
-//                    System.out.println( act.getName() );
-//                    // Код для каждой задачи...
-//                }
-
-                BOIterator<WBS> boi_wbs = proj.loadAllWBS( new String[]{
-                        "Name",
-                        "Code",
-                        "GUID",
-                        "OBSName",
-                        "ParentObjectId",
-                        //"StatusReviewerName",
-                        //"WBSSpread",
-                        "ObjectId",
-                        "WBSCategoryObjectId",
-                        "Status",
-                        "StartDate",
-                        "FinishDate",
-                        "SummaryActualStartDate",
-                        "SummaryActualFinishDate"}, "ParentObjectId = " + proj.getWBSObjectId(), "ObjectId asc"  /*"WBSCategoryObjectId asc"*/);
-
-                System.out.println("Код               id объекта WBS  id parent WBS  Наименование объекта                                                                              GUID                                    плановая стартовая дата  плановая общая дата окончания  актуальная стартовая дата  актуальная дата окончания");
-
-                String id_ = "";
-                StringBuilder code_ = new StringBuilder(proj.getId());
-                while ( boi_wbs.hasNext() )
-                {
-                    WBS work = boi_wbs.next();
-                    //work.getObjectId()
-                    printWbsList(work,code_.toString());
-
-//                    17.07.23
-//                    id_ = work.getObjectId().toString();
-//                    code_.append(work.getCode());
-//
-//                    BOIterator<WBS> boi_wbs_child =  work.loadWBSChildren( new String[]{"Name", "Code", "ObjectId"}, null, null);
-//                    while ( boi_wbs_child.hasNext() ){
-//                        WBS work_c = boi_wbs_child.next();
-//                        id_ = work_c.getObjectId().toString();
-//                        code_.append(work_c.getCode());
-//                    }
-//
-//                    System.out.println( work.getCode() + tab_s.substring(work.getCode().length()) + // Код
-//                                        work.getObjectId().toString() + "           " + // id объекта WBS
-//                                        work.getParentObjectId() + "          " + // id объекта parent WBS
-//                                        work.getName() + tab_ss.substring(work.getName().length()) + // Наименование объекта
-//                                        work.getGUID());
-
-
-//                    if ( work.getOBSName() != null) {
-//                        System.out.println( "    OBSName:" + work.getOBSName()); // CEPTR
-//                    }
-//                    if ( work.getStatusReviewerName() != null) {
-//                        System.out.println( "    StatusReviewerName:" + work.getStatusReviewerName()); // null
-//                    }
-//                    if ( work.getWBSSpread() != null) {
-//                        WBSSpread spr = work.getWBSSpread();
-//                        System.out.println( "    spr:" + spr.toString() );
-//                    }
-
-//                  System.out.println( "       " + work.getValue(0).toString() +
-//                                            "   " + work.getValue(1).toString() +
-//                                            "   " + work.getValue(2).toString() +
-//                                            "   " + work.getValue("Status").toString() +
-//                                            //"   " + work.getValue(3).toString() +
-//                                            //"   " + work.getValue(4).toString() +
-//                                            //"   " + work.getValue(5).toString() +
-//                                            //"   " + work.getValue(6).toString() +
-//                                            //"   " + work.getValue(7).toString() +
-//                                            "   " + work.getName() +
-//                                   " id объекта:" + work.getObjectId().toString() );
-
-//                   BOIterator<Activity> boi_a = work.loadAllActivities( new String[]{ "Name" }, null, null  );
-//
-//                    while ( boi_a.hasNext() )
-//                    {
-//                        Activity act = boi_a.next();
-//                        System.out.println(//"                         " + act.getValue(0).toString() +
-//                                           //"   " + act.getValue("Status").toString() +
-//                                           "                          работы:" + act.getName() );
-//                        // Код для каждой задачи...
-//                    }
-
-                    // Код для каждой задачи...
+                while (boiWbs.hasNext()) {
+                    WBS work = boiWbs.next();
+                    wbsList.add(mapWbs(work));
                 }
             }
-        }
-        catch ( Exception e ) {
-            // Best practices would involve catching specific exceptions.  To keep this
-            // sample code short, we catch Exception
-            System.out.printf("что то пошло не так!");
-            e.printStackTrace();
-        }
-        finally
-        {
-            if ( session != null )
-                session.logout();
-        }
 
-        log.info("Всё ок!");
-        for (int i = 1; i <= 5; i++) {
-            System.out.println("i = " + i);
+            return wbsList;
+        } catch (ServerException | NetworkException | ClientException e) {
+            throw new IllegalStateException("Cannot load WBS list: " + e.getMessage());
         }
     }
 
-    private void printWbsList(WBS work, String cod_){
-        StringBuilder code_ = new StringBuilder(cod_);
-        String tab_s = "                  ";
-        String tab_ss = "                                                                                                  ";
+    private DatabaseInstance tryGetDbInstance() {
         try {
-            code_.append("." + work.getCode()); // Код узла собираем по кускам, т.к. каждый узел хранит свой код, надо все коды узлов собирать в конечный
-            System.out.println();
-            System.out.println(code_ + tab_s.substring(code_.toString().length()) + // Код
-                    work.getObjectId().toString() + "           " +                            // id объекта WBS
-                    work.getParentObjectId() + "          " +                                  // id объекта parent WBS
-                    work.getName() + tab_ss.substring(work.getName().length()) +               // Наименование объекта
-                    work.getGUID() + "  " +                                                    // GUID
-                    ((work.getStartDate() == null) ? "не задана                " : work.getSummaryPlannedStartDate().toString()+ "   ")  +
-                    ((work.getFinishDate() == null) ? "не задана                      " : work.getSummaryPlannedFinishDate().toString()+ "   ") +
-                    ((work.getSummaryActualStartDate() == null) ? "не задана                  " : work.getSummaryActualStartDate().toString()+ "   ") +
-                    ((work.getSummaryActualFinishDate() == null) ? "не задана" : work.getSummaryActualFinishDate().toString())
+            DatabaseInstance[] dbInstances = Session.getDatabaseInstances(getRmiUrl());
+            if (dbInstances.length == 0)
+                throw new IllegalStateException("There are no Primavera database instances");
+
+            return dbInstances[0];
+        } catch (ServerException | NetworkException | ClientException e) {
+            throw new IllegalStateException("Cannot get Primavera database instance: " + e.getMessage());
+        }
+    }
+
+    private String getRmiUrl() {
+        return RMIURL.getRmiUrl(primaveraProps.getMode(), primaveraProps.getHost(), primaveraProps.getPort());
+    }
+
+    private WbsDto mapWbs(WBS work){
+        try {
+            WbsDto wbsDto = wbsMapper.wbsToWbsDto(work);
+//            System.out.println(
+//                    work.getObjectId().toString() + ", " + // ID объекта WBS
+//                    work.getParentObjectId() + ", " + // ID объекта parent WBS
+//                    work.getName() +  ", " + // Наименование объекта
+//                    work.getGUID() + ", " // GUID
+//            );
+//
+//            BOIterator<Activity> boiActivity = work.loadActivities(
+//                    new String[] {
+//                            "Name",
+//                            "WBSCode",
+//                            "WBSName",
+//                            "WBSNamePath",
+//                            "WBSObjectId",
+//                            "Id",
+//                            "PlannedStartDate",
+//                            "PlannedFinishDate",
+//                            "ActualStartDate",
+//                            "ActualFinishDate"
+//                    },
+//                    null,
+//                    null
+//            );
+//
+//            while (boiActivity.hasNext()) {
+//                Activity act = boiActivity.next();
+//                System.out.println(
+//                        act.getId() + ", " +
+//                        act.getName() + ", " +
+//                        act.getPlannedStartDate().toString() + ", " +
+//                        act.getPlannedFinishDate().toString() + ", " +
+//                        act.getActualStartDate() + ", " +
+//                        act.getActualFinishDate()
+//                );
+//
+//            }
+
+            BOIterator<WBS> boiWbsChildren = work.loadWBSChildren(
+                    new String[] {
+                            "Name",
+                            "Code",
+                            "ObjectId",
+                            "ParentObjectId",
+                            "GUID",
+                            "StartDate",
+                            "FinishDate",
+                            "SummaryActualStartDate",
+                            "SummaryActualFinishDate"
+                    },
+                    null,
+                    null
             );
 
-            BOIterator<Activity> boi_a = work.loadActivities( new String[]{ "Name", "WBSCode", "WBSName","WBSNamePath","WBSObjectId","Id" ,"PlannedStartDate", "PlannedFinishDate", "ActualStartDate", "ActualFinishDate"}, null, null  );
-
-            while (boi_a.hasNext()) {
-                Activity act = boi_a.next();
-                System.out.println(//"                         " + act.getValue(0).toString() +
-                        //"   " + act.getValue("Status").toString() +
-                        "                                                   работы: " + //act.getWBSCode() + "  " +
-                                //act.getWBSName() + "  " +
-                                //act.getWBSNamePath() +"  " +
-                                //act.getWBSObjectId() + "  " +
-                                act.getId() + "  " +
-                                act.getName() + "  плановая дата начала: " +
-                                act.getPlannedStartDate().toString() + " плановая дата окончания: " +
-                                act.getPlannedFinishDate().toString() + "   актуальная дата начала: " +
-                                ( (act.getActualStartDate() == null) ? " не задана " : act.getActualStartDate().toString()) + " актуальная дата окончания: " +
-                                ( (act.getActualFinishDate() == null) ? " не задана " : act.getActualFinishDate().toString() ) );
-
+            while (boiWbsChildren.hasNext()) {
+                WBS childWork = boiWbsChildren.next();
+                WbsDto childWbsDto = mapWbs(childWork); // recursive call
+                wbsDto.addChild(childWbsDto);
             }
 
-            BOIterator<WBS> boi_wbs_child = work.loadWBSChildren(new String[]{"Name",
-                    "Code",
-                    "ObjectId",
-                    "ParentObjectId",
-                    "GUID",
-                    "StartDate",
-                    "FinishDate",
-                    "SummaryActualStartDate",
-                    "SummaryActualFinishDate"}, null, null);
-            while (boi_wbs_child.hasNext()) {
-                WBS work_c = boi_wbs_child.next();
-                printWbsList(work_c, code_.toString()); //рекурсия пока boi_wbs_child.hasNext()
-            }
-        }
-        catch (Exception e) {
-            log.error(e.getMessage());
+            return wbsDto;
+        } catch (ServerException | NetworkException | BusinessObjectException e) {
+            throw new IllegalStateException("Cannot load WBS child list: " + e.getMessage());
         }
     }
 }
