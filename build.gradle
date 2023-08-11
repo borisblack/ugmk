@@ -29,7 +29,8 @@ ext {
 }
 
 dependencies {
-//	implementation files('')
+//	implementation fileTree(dir: 'lib', include: '*.jar')
+	implementation files('lib/intgserver.jar')
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
