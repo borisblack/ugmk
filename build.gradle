@@ -39,12 +39,12 @@ dependencies {
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	implementation "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
