@@ -14,12 +14,12 @@ import com.primavera.integration.client.bo.object.Project;
 import com.primavera.integration.client.bo.object.WBS;
 import com.primavera.integration.common.DatabaseInstance;
 import com.primavera.integration.network.NetworkException;
-import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +46,8 @@ public class WbsService {
         try (Session session = Session.login(getRmiUrl(), dbInstance.getDatabaseId(), primaveraProps.getUsername(), primaveraProps.getPassword())) {
             List<WbsDto> wbsList = new ArrayList<>();
             EnterpriseLoadManager elm = session.getEnterpriseLoadManager();
+
+            log.info("Start loading...");
             BOIterator<Project> boi = elm.loadProjects(
                     new String[] {
                             "ObjectId", // ID проекта
@@ -75,7 +77,7 @@ public class WbsService {
                             "SummaryActualStartDate",
                             "SummaryActualFinishDate"
                     },
-                    "ObjectId = 368",
+                    "ObjectId = 305",
                     "ObjectId asc"
             );
 
@@ -107,6 +109,7 @@ public class WbsService {
                     wbsList.add(mapWbs(work));
                 }
             }
+            log.info("Loading completed.");
 
             return wbsList;
         } catch (ServerException | NetworkException | ClientException e) {

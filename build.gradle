@@ -1,20 +1,14 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.1.2'
-	id 'io.spring.dependency-management' version '1.1.2'
+	id 'org.springframework.boot' version '2.7.14'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
 group = 'com.amplifierconsultancy'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+	sourceCompatibility = '1.8'
 }
 
 repositories {
@@ -22,25 +16,29 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2022.0.4")
+	set('springCloudVersion', "2021.0.8")
 	set('mapstructVersion', "1.5.5.Final")
-	set('lombokVersion', "1.18.28")
 	set('lombokMapstructBindingVersion', "0.2.0")
 }
 
+configurations {
+	all*.exclude module: 'spring-boot-starter-logging'
+}
+
 dependencies {
-//	implementation fileTree(dir: 'lib', include: '*.jar')
-	implementation files('lib/intgserver.jar')
+	implementation fileTree(dir: 'lib', include: '*.jar')
+//	implementation files('lib/intgserver.jar')
 
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.slf4j:slf4j-api:2.0.7'
+	implementation 'org.slf4j:slf4j-log4j12:2.0.7'
+	implementation 'org.springframework.boot:spring-boot-starter-web:'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 
-	compileOnly "org.projectlombok:lombok:${lombokVersion}"
+	compileOnly "org.projectlombok:lombok"
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	implementation "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
 
-	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
