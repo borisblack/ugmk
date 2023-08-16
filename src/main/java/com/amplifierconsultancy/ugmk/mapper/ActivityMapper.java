@@ -9,8 +9,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ActivityMapper {
     @Mapping(target = "wbsObjectId", expression = "java(activity.getWBSObjectId().toString())")
-    @Mapping(target = "wbsCode", expression = "java(activity.getWBSCode())")
-    @Mapping(target = "wbsName", expression = "java(activity.getWBSName())")
-    @Mapping(target = "wbsNamePath", expression = "java(activity.getWBSNamePath())")
+    @Mapping(target = "wbsCode", source = "WBSCode")
+    @Mapping(target = "wbsName", source = "WBSName")
+    @Mapping(target = "wbsNamePath", source = "WBSNamePath")
     ActivityDto activityToActivityDto(Activity activity) throws BusinessObjectException;
 }
