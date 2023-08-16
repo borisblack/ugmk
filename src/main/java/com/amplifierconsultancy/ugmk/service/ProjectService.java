@@ -59,7 +59,6 @@ public class ProjectService {
     private static final String UNIFIER_PROJECT_NAME = "UnifierProjectName";
     private static final String CONTRACT_MANAGEMENT_GROUP_NAME = "ContractManagementGroupName";
     private static final String CONTRACT_MANAGEMENT_PROJECT_NAME = "ContractManagementProjectName";
-
     private static final String ACTIVITY_ID_PREFIX = "ActivityIdPrefix";
     private static final String ACTIVITY_DEFAULT_CALENDAR_NAME = "ActivityDefaultCalendarName";
     private static final String PARENT_EPS_NAME = "ParentEPSName";
@@ -82,7 +81,7 @@ public class ProjectService {
             NAME, // Наименование проекта
             OBS_OBJECT_ID,
             OBS_NAME,
-            WBS_OBJECT_ID, // ID WBS (id узла в дереве)
+            WBS_OBJECT_ID, // ID WBS (ID узла в дереве)
             WBS_HIERARCHY_LEVELS, // Level WBS
             WBS_CODE_SEPARATOR,
             STATUS,
