@@ -8,6 +8,15 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface WbsMapper {
-    @Mapping(target = "children", ignore = true)
-    WbsDto wbsToWbsDto(WBS wbs) throws BusinessObjectException;
+    @Mapping(target = "objectId", expression = "java(wbs.getObjectId().toString())")
+    @Mapping(target = "parentObjectId", expression = "java(wbs.getParentObjectId().toString())")
+    @Mapping(target = "guid", source = "wbs.GUID")
+    @Mapping(target = "fullCode", expression = "java(prefix + wbs.getCode())")
+    @Mapping(target = "obsObjectId", expression = "java(wbs.getOBSObjectId().toString())")
+    @Mapping(target = "obsName", expression = "java(wbs.getOBSName())")
+    @Mapping(target = "wbsCategoryObjectId", expression = "java(wbs.getWBSCategoryObjectId() == null ? null : wbs.getWBSCategoryObjectId().toString())")
+    @Mapping(target = "status", expression = "java(wbs.getStatus().toString())")
+    @Mapping(target = "activities", ignore = true)
+    @Mapping(target = "childWbsList", ignore = true)
+    WbsDto wbsToWbsDto(WBS wbs, String prefix) throws BusinessObjectException;
 }

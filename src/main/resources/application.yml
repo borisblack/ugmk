@@ -1,6 +1,6 @@
 app:
   primavera:
-    bootstrap-home: 'D:/P6IntegrationAPI_1'
+    bootstrap-home: ${PRIMAVERA_BOOTSTRAP_HOME:}
     mode: 0
     host: 'localhost'
     port: 9099
