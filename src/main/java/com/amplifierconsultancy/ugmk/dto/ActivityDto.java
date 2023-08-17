@@ -2,7 +2,7 @@ package com.amplifierconsultancy.ugmk.dto;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Data
 public class ActivityDto {
@@ -12,8 +12,8 @@ public class ActivityDto {
     private String wbsCode;
     private String wbsName;
     private String wbsNamePath;
-    private Date plannedStartDate;
-    private Date plannedFinishDate;
-    private Date actualStartDate;
-    private Date actualFinishDate;
+    private OffsetDateTime plannedStartDate;
+    private OffsetDateTime plannedFinishDate;
+    private OffsetDateTime actualStartDate;
+    private OffsetDateTime actualFinishDate;
 }

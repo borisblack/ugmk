@@ -3,8 +3,8 @@ package com.amplifierconsultancy.ugmk.dto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -19,10 +19,10 @@ public class WbsDto {
     private String obsName;
     private String wbsCategoryObjectId;
     private String status;
-    private Date startDate;
-    private Date finishDate;
-    private Date summaryActualStartDate;
-    private Date summaryActualFinishDate;
+    private OffsetDateTime startDate;
+    private OffsetDateTime finishDate;
+    private OffsetDateTime summaryActualStartDate;
+    private OffsetDateTime summaryActualFinishDate;
 
     private List<ActivityDto> activities = new ArrayList<>();
 

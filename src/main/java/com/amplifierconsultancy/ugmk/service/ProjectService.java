@@ -168,7 +168,7 @@ public class ProjectService {
 
             while (boi.hasNext()) {
                 Project proj = boi.next();
-                ProjectDto projectDto = projectMapper.projectToProjectDto(proj);
+                ProjectDto projectDto = projectMapper.toProjectDto(proj);
                 projects.add(projectDto);
 
                 BOIterator<WBS> boiWbs = proj.loadAllWBS(
@@ -208,7 +208,7 @@ public class ProjectService {
 
     private WbsDto mapWbs(WBS work, String prefix){
         try {
-            WbsDto wbsDto = wbsMapper.wbsToWbsDto(work, prefix);
+            WbsDto wbsDto = wbsMapper.toWbsDto(work, prefix);
 
             // Handle activities
             BOIterator<Activity> boiActivity = work.loadActivities(
@@ -219,7 +219,7 @@ public class ProjectService {
 
             while (boiActivity.hasNext()) {
                 Activity act = boiActivity.next();
-                ActivityDto activityDto = activityMapper.activityToActivityDto(act);
+                ActivityDto activityDto = activityMapper.toActivityDto(act);
                 wbsDto.addActivity(activityDto);
             }
 

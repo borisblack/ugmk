@@ -6,7 +6,10 @@ import com.primavera.integration.client.bo.object.WBS;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {DateTimeMapper.class}
+)
 public interface WbsMapper {
     @Mapping(target = "objectId", expression = "java(wbs.getObjectId().toString())")
     @Mapping(target = "parentObjectId", expression = "java(wbs.getParentObjectId().toString())")
@@ -18,5 +21,5 @@ public interface WbsMapper {
     @Mapping(target = "status", expression = "java(wbs.getStatus().toString())")
     @Mapping(target = "activities", ignore = true)
     @Mapping(target = "childWbsList", ignore = true)
-    WbsDto wbsToWbsDto(WBS wbs, String prefix) throws BusinessObjectException;
+    WbsDto toWbsDto(WBS wbs, String prefix) throws BusinessObjectException;
 }

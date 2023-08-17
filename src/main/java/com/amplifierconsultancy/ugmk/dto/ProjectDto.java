@@ -2,8 +2,8 @@ package com.amplifierconsultancy.ugmk.dto;
 
 import lombok.Data;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -22,12 +22,12 @@ public class ProjectDto {
     private String activityDefaultCalendarName;
     private String parentEPSName;
     private String addedBy;
-    private Date startDate;
-    private Date finishDate;
-    private Date plannedStartDate;
-    private Date summaryPlannedFinishDate;
-    private Date summaryActualStartDate;
-    private Date summaryActualFinishDate;
+    private OffsetDateTime startDate;
+    private OffsetDateTime finishDate;
+    private OffsetDateTime plannedStartDate;
+    private OffsetDateTime summaryPlannedFinishDate;
+    private OffsetDateTime summaryActualStartDate;
+    private OffsetDateTime summaryActualFinishDate;
 
     private List<WbsDto> wbsList = new ArrayList<>();
 

@@ -6,7 +6,10 @@ import com.primavera.integration.client.bo.object.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {DateTimeMapper.class}
+)
 public interface ProjectMapper {
     @Mapping(target = "objectId", expression = "java(project.getObjectId().toString())")
     @Mapping(target = "guid", source = "GUID")
@@ -17,5 +20,5 @@ public interface ProjectMapper {
     @Mapping(target = "wbsCodeSeparator", source = "WBSCodeSeparator")
     @Mapping(target = "status", expression = "java(project.getStatus().toString())")
     @Mapping(target = "wbsList", ignore = true)
-    ProjectDto projectToProjectDto(Project project) throws BusinessObjectException;
+    ProjectDto toProjectDto(Project project) throws BusinessObjectException;
 }
