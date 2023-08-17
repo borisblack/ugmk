@@ -1,5 +1,6 @@
 package com.amplifierconsultancy.ugmk.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ public class WbsDto {
     private Date summaryActualFinishDate;
 
     private List<ActivityDto> activities = new ArrayList<>();
+
+    @JsonBackReference
     private List<WbsDto> childWbsList = new ArrayList<>();
 
     public void addActivity(ActivityDto activity) {
