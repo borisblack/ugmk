@@ -1,6 +1,6 @@
 package com.amplifierconsultancy.ugmk.dto;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
@@ -26,7 +26,7 @@ public class WbsDto {
 
     private List<ActivityDto> activities = new ArrayList<>();
 
-    @JsonBackReference
+    @JsonManagedReference
     private List<WbsDto> childWbsList = new ArrayList<>();
 
     public void addActivity(ActivityDto activity) {
