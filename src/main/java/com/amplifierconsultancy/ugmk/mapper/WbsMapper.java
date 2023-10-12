@@ -1,5 +1,6 @@
 package com.amplifierconsultancy.ugmk.mapper;
 
+import com.amplifierconsultancy.ugmk.dto.FlatWbsDto;
 import com.amplifierconsultancy.ugmk.dto.WbsDto;
 import com.primavera.integration.client.bo.BusinessObjectException;
 import com.primavera.integration.client.bo.object.WBS;
@@ -22,4 +23,6 @@ public interface WbsMapper {
     @Mapping(target = "activities", ignore = true)
     @Mapping(target = "childWbsList", ignore = true)
     WbsDto toWbsDto(WBS wbs, String prefix) throws BusinessObjectException;
+
+    FlatWbsDto toFlatWbsDto(WbsDto wbs);
 }

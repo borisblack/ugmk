@@ -1,9 +1,7 @@
 package com.amplifierconsultancy.ugmk.service;
 
 import com.amplifierconsultancy.ugmk.config.props.PrimaveraProps;
-import com.amplifierconsultancy.ugmk.dto.ActivityDto;
-import com.amplifierconsultancy.ugmk.dto.ProjectDto;
-import com.amplifierconsultancy.ugmk.dto.WbsDto;
+import com.amplifierconsultancy.ugmk.dto.*;
 import com.amplifierconsultancy.ugmk.mapper.ActivityMapper;
 import com.amplifierconsultancy.ugmk.mapper.ProjectMapper;
 import com.amplifierconsultancy.ugmk.mapper.WbsMapper;
@@ -26,7 +24,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Data
@@ -152,7 +152,7 @@ public class ProjectService {
         System.setProperty(PRIMAVERA_BOOTSTRAP_HOME, primaveraProps.getBootstrapHome());
     }
 
-    public List<ProjectDto> loadProjects(String id) {
+    public Optional<ProjectDto> loadProject(String id) {
         final DatabaseInstance dbInstance = tryGetDbInstance();
 
         try (Session session = Session.login(getRmiUrl(), dbInstance.getDatabaseId(), primaveraProps.getUsername(), primaveraProps.getPassword())) {
@@ -184,7 +184,7 @@ public class ProjectService {
             }
             log.info("Loading completed.");
 
-            return projects;
+            return  (projects.isEmpty()) ? Optional.empty() : Optional.of(projects.get(0));
         } catch (ServerException | NetworkException | ClientException e) {
             throw new IllegalStateException("Cannot load WBS list: " + e.getMessage());
         }
@@ -240,5 +240,26 @@ public class ProjectService {
         } catch (ServerException | NetworkException | BusinessObjectException e) {
             throw new IllegalStateException("Cannot load activities or WBS child list: " + e.getMessage());
         }
+    }
+
+    public Optional<FlatProjectDto> loadFlatProject(String id) {
+        Optional<ProjectDto> projectOpt = loadProject(id);
+        if (!projectOpt.isPresent())
+            return Optional.empty();
+
+        ProjectDto project = projectOpt.get();
+        FlatProjectDto flatProject = projectMapper.toFlatProjectDto(project);
+        fillLists(project.getWbsList(), Collections.emptyList(), flatProject.getWbsList(), flatProject.getActivities());
+
+        return Optional.of(flatProject);
+    }
+
+    private void fillLists(List<WbsDto> sourceWbsList, List<ActivityDto> sourceActivities, List<FlatWbsDto> targetWbsList, List<ActivityDto> targetActivities) {
+        for (WbsDto sourceWbs : sourceWbsList) {
+            targetWbsList.add(wbsMapper.toFlatWbsDto(sourceWbs));
+            fillLists(sourceWbs.getChildWbsList(), sourceWbs.getActivities(), targetWbsList, targetActivities); // recursive call
+        }
+
+        targetActivities.addAll(sourceActivities);
     }
 }

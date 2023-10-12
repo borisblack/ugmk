@@ -1,5 +1,6 @@
 package com.amplifierconsultancy.ugmk.mapper;
 
+import com.amplifierconsultancy.ugmk.dto.FlatProjectDto;
 import com.amplifierconsultancy.ugmk.dto.ProjectDto;
 import com.primavera.integration.client.bo.BusinessObjectException;
 import com.primavera.integration.client.bo.object.Project;
@@ -21,4 +22,7 @@ public interface ProjectMapper {
     @Mapping(target = "status", expression = "java(project.getStatus().toString())")
     @Mapping(target = "wbsList", ignore = true)
     ProjectDto toProjectDto(Project project) throws BusinessObjectException;
+
+    @Mapping(target = "wbsList", ignore = true)
+    FlatProjectDto toFlatProjectDto(ProjectDto project);
 }

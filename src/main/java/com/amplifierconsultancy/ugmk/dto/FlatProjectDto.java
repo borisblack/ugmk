@@ -8,10 +8,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProjectDto extends AbstractProjectDto {
-    private List<WbsDto> wbsList = new ArrayList<>();
-
-    public void addWbs(WbsDto wbs) {
-        wbsList.add(wbs);
-    }
+public class FlatProjectDto extends AbstractProjectDto {
+    private List<FlatWbsDto> wbsList = new ArrayList<>();
+    private List<ActivityDto> activities = new ArrayList<>();
 }
